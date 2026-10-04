@@ -3,16 +3,26 @@
 # The Chez Scheme executable is named differently across platforms
 # (chez on Homebrew, scheme from source, chezscheme on Debian/Ubuntu);
 # set CHEZ to override. Chez prints a bare version number for --version,
-# which tells it apart from other Schemes installed as `scheme`.
+# which tells it apart from other Schemes installed as `scheme`; every
+# match on PATH is checked, so another Scheme earlier on PATH doesn't
+# hide Chez.
 ROOT=$(dirname "$(dirname "$(realpath "$0")")")
 if [ -z "$CHEZ" ]; then
+  set -f
+  IFS_SAVE=$IFS
+  IFS=:
   for cmd in chez scheme chezscheme; do
-    if command -v "$cmd" >/dev/null 2>&1 &&
-       "$cmd" --version 2>&1 | grep -Eq '^[0-9]+\.[0-9]+'; then
-      CHEZ=$cmd
-      break
-    fi
+    for dir in $PATH; do
+      path="${dir:-.}/$cmd"
+      if [ -f "$path" ] && [ -x "$path" ] &&
+         "$path" --version 2>&1 | grep -Eq '^[0-9]+\.[0-9]+'; then
+        CHEZ=$path
+        break 2
+      fi
+    done
   done
+  IFS=$IFS_SAVE
+  set +f
 fi
 if [ -z "$CHEZ" ]; then
   echo "chez-passgen: Chez Scheme not found (tried chez, scheme, chezscheme); set CHEZ" >&2
