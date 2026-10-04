@@ -1,0 +1,11 @@
+#!/bin/sh
+# Runs passgen.sps with the project and zxcvbn-chez on the library path.
+# Set ZXCVBN_CHEZ to the zxcvbn-chez checkout (default: a sibling of this project).
+ROOT=$(dirname "$(dirname "$(realpath "$0")")")
+ZXCVBN_CHEZ=${ZXCVBN_CHEZ:-$ROOT/../zxcvbn-chez}
+if [ ! -d "$ZXCVBN_CHEZ/.akku/lib" ]; then
+  echo "passgen: zxcvbn-chez not found at $ZXCVBN_CHEZ (run 'akku install' there or set ZXCVBN_CHEZ)" >&2
+  exit 1
+fi
+export CHEZSCHEMELIBDIRS="$ROOT:$ZXCVBN_CHEZ/.akku/lib${CHEZSCHEMELIBDIRS:+:$CHEZSCHEMELIBDIRS}"
+exec chez --script "$ROOT/passgen.sps" "$@"

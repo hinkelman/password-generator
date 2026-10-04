@@ -5,3 +5,6 @@
 *.scm~
 *.scm#*
 .#*.scm
+
+# srfi-64 test logs
+*.log
