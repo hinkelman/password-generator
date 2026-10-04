@@ -5,11 +5,10 @@
 #!r6rs
 
 ;; Command-line interface. Run via the `bin/passgen` wrapper, which puts this
-;; directory and zxcvbn-chez on the library path.
+;; directory on the library path.
 
 (import (chezscheme)
-        (passgen)
-        (zxcvbn-chez))
+        (passgen))
 
 (define usage "\
 Usage: passgen [options]
@@ -20,9 +19,9 @@ Options:
   -n, --count N         number of passwords to generate (default 1)
       --min N           minimum length (default 16)
       --max N           maximum length (default 32)
-  -s, --sep STR         word separator (default \"-\")
-  -g, --min-guesses X   reject passwords that zxcvbn estimates take fewer
-                        than 10^X guesses to crack (default 14)
+  -s, --sep STR         word separator, no letters or digits (default \"-\")
+  -b, --min-bits X      minimum entropy in bits, assuming the attacker knows
+                        the word list and how passwords are built (default 50)
   -c, --no-copy         don't copy the password to the clipboard
   -h, --help            show this message
 
@@ -51,7 +50,7 @@ When generating a single password, it is also copied to the clipboard
 (define (parse-args args)
   (let loop ([args args]
              [opts '((count . 1) (min . 16) (max . 32) (sep . "-")
-                     (min-guesses . 14) (copy . #t))])
+                     (min-bits . 50) (copy . #t))])
     (define (value) (if (null? (cdr args)) #f (cadr args)))
     (define (set key val) (cons (cons key val) opts))
     (if (null? args)
@@ -71,8 +70,8 @@ When generating a single password, it is also copied to the clipboard
                 [(member flag '("-s" "--sep"))
                  (unless (value) (fail "~a expects a value" flag))
                  (loop (cddr* args) (set 'sep (value)))]
-                [(member flag '("-g" "--min-guesses"))
-                 (loop (cddr* args) (set 'min-guesses (parse-number flag (value))))]
+                [(member flag '("-b" "--min-bits"))
+                 (loop (cddr* args) (set 'min-bits (parse-number flag (value))))]
                 [else (fail "unknown option ~s (see --help)" flag)])))))
 
 (define (cddr* args) (if (null? (cdr args)) '() (cddr args)))
@@ -114,14 +113,18 @@ When generating a single password, it is also copied to the clipboard
          [count (opt 'count opts)]
          [min-length (opt 'min opts)]
          [max-length (opt 'max opts)]
-         [min-guesses (opt 'min-guesses opts)])
+         [sep (opt 'sep opts)])
     (unless (<= 1 min-length max-length)
       (fail "--min must be at least 1 and no greater than --max"))
-    (let* ([accept? (lambda (pw)
-                      (>= (cdr (assoc "guesses-log10" (zxcvbn pw))) min-guesses))]
-           [pws (map (lambda (i)
-                       (generate-password min-length max-length (opt 'sep opts) accept?))
-                     (iota count))])
+    (when (or (string=? sep "")
+              (exists (lambda (c) (or (char-alphabetic? c) (char-numeric? c)))
+                      (string->list sep)))
+      (fail "--sep must be non-empty and contain no letters or digits"))
+    (let ([pws (map (lambda (i)
+                      (guard (e [(error? e)
+                                 (fail "could not generate a password with these settings; try a larger --max or smaller --min-bits")])
+                        (generate-password min-length max-length sep (opt 'min-bits opts))))
+                    (iota count))])
       (for-each (lambda (pw) (printf "~a\n" pw)) pws)
       (when (and (= count 1) (opt 'copy opts))
         (unless (copy-to-clipboard (car pws))
