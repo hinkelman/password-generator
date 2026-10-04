@@ -25,10 +25,10 @@ Each word contributes about 12.5 bits from the word list plus about 0.5–7 bits
 ## Usage
 
 ```
-$ bin/passgen
+$ chez-passgen
 canyon-BECK-3lcitrap-fry-till
 
-$ bin/passgen -n 3 -b 70
+$ chez-passgen -n 3 -b 70
 lavish-walking-pseudo-IDE4-TEAM
 retsam-bundl3-TIRW-salary-etaler
 bas1c-dial-yrdnual-EB0L-thatcher
@@ -48,7 +48,11 @@ Options:
   -h, --help            show this message
 ```
 
-`bin/passgen` can be symlinked onto your `PATH`.
+To run it as `chez-passgen` from anywhere, symlink it into a directory on your `PATH`, e.g.:
+
+```
+ln -s "$PWD/bin/chez-passgen" ~/.local/bin/chez-passgen
+```
 
 ## Project layout
 
@@ -57,7 +61,7 @@ Options:
 | `passgen.sls` | `(passgen)` library: randomness, word transformations, entropy, password assembly |
 | `passgen/words.scm` | generated word list |
 | `passgen.sps` | command-line interface |
-| `bin/passgen` | wrapper that sets the library path and runs the CLI |
+| `bin/chez-passgen` | wrapper that sets the library path and runs the CLI |
 | `data-scripts/build-word-list.ss` | rebuilds the word list |
 | `tests/test-passgen.sps` | tests |
 

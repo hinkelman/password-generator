@@ -4,14 +4,14 @@
 ;; SPDX-License-Identifier: MIT
 #!r6rs
 
-;; Command-line interface. Run via the `bin/passgen` wrapper, which puts this
+;; Command-line interface. Run via the `bin/chez-passgen` wrapper, which puts this
 ;; directory on the library path.
 
 (import (chezscheme)
         (passgen))
 
 (define usage "\
-Usage: passgen [options]
+Usage: chez-passgen [options]
 
 Generate human-readable passwords like tongue-slip-past-SP1L.
 
@@ -30,7 +30,7 @@ When generating a single password, it is also copied to the clipboard
 ")
 
 (define (fail fmt . args)
-  (apply fprintf (current-error-port) (string-append "passgen: " fmt "\n") args)
+  (apply fprintf (current-error-port) (string-append "chez-passgen: " fmt "\n") args)
   (exit 1))
 
 (define (parse-number flag str)
@@ -129,6 +129,6 @@ When generating a single password, it is also copied to the clipboard
       (when (and (= count 1) (opt 'copy opts))
         (unless (copy-to-clipboard (car pws))
           (fprintf (current-error-port)
-                   "passgen: no clipboard command found; password not copied\n"))))))
+                   "chez-passgen: no clipboard command found; password not copied\n"))))))
 
 (main (cdr (command-line)))
