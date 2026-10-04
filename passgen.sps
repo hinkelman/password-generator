@@ -96,17 +96,24 @@ When generating a single password, it is also copied to the clipboard
           [else (loop (cdr chars) (cons (car chars) cur) out)])))
 
 ;; Writes str to the clipboard command's stdin (no shell quoting involved).
-;; Returns #t on success.
+;; Returns 'none if no command is found, 'ok if it succeeds, or the command
+;; if it fails. The command's output goes to /dev/null so that tools which
+;; fork to keep serving the clipboard (wl-copy, xclip) don't hold the pipe
+;; open; the shell then reports its exit status.
 (define (copy-to-clipboard str)
   (let ([cmd (find-clipboard-command)])
-    (and cmd
-         (let-values ([(to-stdin from-stdout from-stderr pid)
-                       (open-process-ports cmd (buffer-mode block) (native-transcoder))])
-           (put-string to-stdin str)
-           (close-port to-stdin)
-           (close-port from-stdout)
-           (close-port from-stderr)
-           #t))))
+    (if (not cmd)
+        'none
+        (let-values ([(to-stdin from-stdout from-stderr pid)
+                      (open-process-ports
+                       (format "{ ~a; } >/dev/null 2>&1; echo $?" cmd)
+                       (buffer-mode block) (native-transcoder))])
+          (put-string to-stdin str)
+          (close-port to-stdin)
+          (let ([status (get-line from-stdout)])
+            (close-port from-stdout)
+            (close-port from-stderr)
+            (if (equal? status "0") 'ok cmd))))))
 
 (define (main args)
   (let* ([opts (parse-args args)]
@@ -127,8 +134,13 @@ When generating a single password, it is also copied to the clipboard
                     (iota count))])
       (for-each (lambda (pw) (printf "~a\n" pw)) pws)
       (when (and (= count 1) (opt 'copy opts))
-        (unless (copy-to-clipboard (car pws))
-          (fprintf (current-error-port)
-                   "chez-passgen: no clipboard command found; password not copied\n"))))))
+        (let ([result (copy-to-clipboard (car pws))])
+          (cond [(eq? result 'ok)]
+                [(eq? result 'none)
+                 (fprintf (current-error-port)
+                          "chez-passgen: no clipboard command found; password not copied\n")]
+                [else
+                 (fprintf (current-error-port)
+                          "chez-passgen: ~a failed; password not copied\n" result)]))))))
 
 (main (cdr (command-line)))

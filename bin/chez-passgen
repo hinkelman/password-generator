@@ -17,6 +17,9 @@ fi
 if [ -z "$CHEZ" ]; then
   echo "chez-passgen: Chez Scheme not found (tried chez, scheme, chezscheme); set CHEZ" >&2
   exit 1
+elif ! command -v "$CHEZ" >/dev/null 2>&1; then
+  echo "chez-passgen: CHEZ is set to \"$CHEZ\", which was not found" >&2
+  exit 1
 fi
 export CHEZSCHEMELIBDIRS="$ROOT${CHEZSCHEMELIBDIRS:+:$CHEZSCHEMELIBDIRS}"
 exec "$CHEZ" --script "$ROOT/passgen.sps" "$@"
