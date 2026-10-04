@@ -13,7 +13,7 @@
 ;;     or on the blocklist.
 ;;
 ;; run this script with the following line in the terminal
-;; chez --script ./data-scripts/build-word-list.ss [path/to/zxcvbn-chez/data]
+;; scheme --script ./data-scripts/build-word-list.ss [path/to/zxcvbn-chez/data]
 
 (import (chezscheme))
 

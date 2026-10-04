@@ -22,6 +22,8 @@ Each word contributes about 12.5 bits from the word list plus about 0.5–7 bits
 
 - Chez Scheme (tested with 10.4)
 
+The Chez Scheme executable is named `chez` when installed with Homebrew, `scheme` when built from source, and `chezscheme` on Debian/Ubuntu. `chez-passgen` finds whichever is installed; set `CHEZ` to choose one explicitly. The commands below use `scheme`, so substitute the name on your system.
+
 ## Usage
 
 ```
@@ -68,13 +70,13 @@ ln -s "$PWD/bin/chez-passgen" ~/.local/bin/chez-passgen
 Run the tests:
 
 ```
-CHEZSCHEMELIBDIRS=. chez --script tests/test-passgen.sps
+CHEZSCHEMELIBDIRS=. scheme --script tests/test-passgen.sps
 ```
 
 Rebuilding the word list is only needed to change it. The script filters the frequency lists in [zxcvbn-chez](https://github.com/hinkelman/zxcvbn-chez)'s `data` directory against `/usr/share/dict/words`:
 
 ```
-chez --script data-scripts/build-word-list.ss ../zxcvbn-chez/data
+scheme --script data-scripts/build-word-list.ss ../zxcvbn-chez/data
 ```
 
 ## License

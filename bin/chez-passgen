@@ -1,5 +1,22 @@
 #!/bin/sh
 # Runs passgen.sps with the project root on the library path.
+# The Chez Scheme executable is named differently across platforms
+# (chez on Homebrew, scheme from source, chezscheme on Debian/Ubuntu);
+# set CHEZ to override. Chez prints a bare version number for --version,
+# which tells it apart from other Schemes installed as `scheme`.
 ROOT=$(dirname "$(dirname "$(realpath "$0")")")
+if [ -z "$CHEZ" ]; then
+  for cmd in chez scheme chezscheme; do
+    if command -v "$cmd" >/dev/null 2>&1 &&
+       "$cmd" --version 2>&1 | grep -Eq '^[0-9]+\.[0-9]+'; then
+      CHEZ=$cmd
+      break
+    fi
+  done
+fi
+if [ -z "$CHEZ" ]; then
+  echo "chez-passgen: Chez Scheme not found (tried chez, scheme, chezscheme); set CHEZ" >&2
+  exit 1
+fi
 export CHEZSCHEMELIBDIRS="$ROOT${CHEZSCHEMELIBDIRS:+:$CHEZSCHEMELIBDIRS}"
-exec chez --script "$ROOT/passgen.sps" "$@"
+exec "$CHEZ" --script "$ROOT/passgen.sps" "$@"

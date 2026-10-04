@@ -5,7 +5,7 @@
 #!r6rs
 
 ;; run from the project root
-;; CHEZSCHEMELIBDIRS=. chez --script tests/test-passgen.sps
+;; CHEZSCHEMELIBDIRS=. scheme --script tests/test-passgen.sps
 
 (import (chezscheme)
         (passgen))
