@@ -22,7 +22,7 @@ Each word contributes about 12.5 bits from the word list plus about 0.5–7 bits
 
 - Chez Scheme (tested with 10.4)
 
-The Chez Scheme executable is named `chez` when installed with Homebrew, `scheme` when built from source, and `chezscheme` on Debian/Ubuntu. `chez-passgen` finds whichever is installed; set `CHEZ` to choose one explicitly. The commands below use `scheme`, so substitute the name on your system.
+The Chez Scheme executable is named `chez` when installed with Homebrew, `scheme` when built from source, and `chezscheme` on Debian/Ubuntu. `chez-passgen` tries those names in that order, checking every match on your `PATH` and skipping other Schemes installed as `scheme`. To choose one explicitly, set `CHEZ` to a command name or path, e.g., `CHEZ=/opt/chez/bin/scheme chez-passgen`. The commands below use `scheme`, so substitute the name on your system.
 
 ## Usage
 
