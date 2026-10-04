@@ -36,7 +36,7 @@ retsam-bundl3-TIRW-salary-etaler
 bas1c-dial-yrdnual-EB0L-thatcher
 ```
 
-When a single password is generated, it is also copied to the clipboard using the first of `pbcopy`, `wl-copy`, `xclip`, or `xsel` that is installed. Pass `-c` to skip this.
+When a single password is generated, it is also copied to the clipboard using the first of `pbcopy`, `wl-copy`, `xclip`, or `xsel` that is installed. If none is installed, or the command fails (e.g., `xclip` with no display), a warning is printed to stderr; the password is still printed and the exit status is unaffected. Pass `-c` to skip copying.
 
 ```
 Options:
